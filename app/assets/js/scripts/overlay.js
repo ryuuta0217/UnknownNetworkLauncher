@@ -6,10 +6,10 @@
 
 /**
  * Check to see if the overlay is visible.
- * 
+ *
  * @returns {boolean} Whether or not the overlay is visible.
  */
-function isOverlayVisible(){
+function isOverlayVisible() {
     return document.getElementById('main').hasAttribute('overlay')
 }
 
@@ -17,40 +17,41 @@ let overlayHandlerContent
 
 /**
  * Overlay keydown handler for a non-dismissable overlay.
- * 
+ *
  * @param {KeyboardEvent} e The keydown event.
  */
-function overlayKeyHandler (e){
-    if(e.key === 'Enter' || e.key === 'Escape'){
+function overlayKeyHandler(e) {
+    if (e.key === 'Enter' || e.key === 'Escape') {
         document.getElementById(overlayHandlerContent).getElementsByClassName('overlayKeybindEnter')[0].click()
     }
 }
+
 /**
  * Overlay keydown handler for a dismissable overlay.
- * 
+ *
  * @param {KeyboardEvent} e The keydown event.
  */
-function overlayKeyDismissableHandler (e){
-    if(e.key === 'Enter'){
+function overlayKeyDismissableHandler(e) {
+    if (e.key === 'Enter') {
         document.getElementById(overlayHandlerContent).getElementsByClassName('overlayKeybindEnter')[0].click()
-    } else if(e.key === 'Escape'){
+    } else if (e.key === 'Escape') {
         document.getElementById(overlayHandlerContent).getElementsByClassName('overlayKeybindEsc')[0].click()
     }
 }
 
 /**
  * Bind overlay keydown listeners for escape and exit.
- * 
+ *
  * @param {boolean} state Whether or not to add new event listeners.
  * @param {string} content The overlay content which will be shown.
- * @param {boolean} dismissable Whether or not the overlay is dismissable 
+ * @param {boolean} dismissable Whether or not the overlay is dismissable
  */
-function bindOverlayKeys(state, content, dismissable){
+function bindOverlayKeys(state, content, dismissable) {
     overlayHandlerContent = content
     document.removeEventListener('keydown', overlayKeyHandler)
     document.removeEventListener('keydown', overlayKeyDismissableHandler)
-    if(state){
-        if(dismissable){
+    if (state) {
+        if (dismissable) {
             document.addEventListener('keydown', overlayKeyDismissableHandler)
         } else {
             document.addEventListener('keydown', overlayKeyHandler)
@@ -60,27 +61,27 @@ function bindOverlayKeys(state, content, dismissable){
 
 /**
  * Toggle the visibility of the overlay.
- * 
+ *
  * @param {boolean} toggleState True to display, false to hide.
  * @param {boolean} dismissable Optional. True to show the dismiss option, otherwise false.
  * @param {string} content Optional. The content div to be shown.
  */
-function toggleOverlay(toggleState, dismissable = false, content = 'overlayContent'){
-    if(toggleState == null){
+function toggleOverlay(toggleState, dismissable = false, content = 'overlayContent') {
+    if (toggleState == null) {
         toggleState = !document.getElementById('main').hasAttribute('overlay')
     }
-    if(typeof dismissable === 'string'){
+    if (typeof dismissable === 'string') {
         content = dismissable
         dismissable = false
     }
     bindOverlayKeys(toggleState, content, dismissable)
-    if(toggleState){
+    if (toggleState) {
         document.getElementById('main').setAttribute('overlay', true)
         // Make things untabbable.
         $('#main *').attr('tabindex', '-1')
         $('#' + content).parent().children().hide()
         $('#' + content).show()
-        if(dismissable){
+        if (dismissable) {
             $('#overlayDismiss').show()
         } else {
             $('#overlayDismiss').hide()
@@ -88,7 +89,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
         $('#overlayContainer').fadeIn({
             duration: 250,
             start: () => {
-                if(getCurrentView() === VIEWS.settings){
+                if (getCurrentView() === VIEWS.settings) {
                     document.getElementById('settingsContainer').style.backgroundColor = 'transparent'
                 }
             }
@@ -100,14 +101,14 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
         $('#overlayContainer').fadeOut({
             duration: 250,
             start: () => {
-                if(getCurrentView() === VIEWS.settings){
+                if (getCurrentView() === VIEWS.settings) {
                     document.getElementById('settingsContainer').style.backgroundColor = 'rgba(0, 0, 0, 0.50)'
                 }
             },
             complete: () => {
                 $('#' + content).parent().children().hide()
                 $('#' + content).show()
-                if(dismissable){
+                if (dismissable) {
                     $('#overlayDismiss').show()
                 } else {
                     $('#overlayDismiss').hide()
@@ -117,20 +118,20 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
     }
 }
 
-function toggleServerSelection(toggleState){
+function toggleServerSelection(toggleState) {
     prepareServerSelectionList()
     toggleOverlay(toggleState, true, 'serverSelectContent')
 }
 
 /**
  * Set the content of the overlay.
- * 
+ *
  * @param {string} title Overlay title text.
  * @param {string} description Overlay description text.
  * @param {string} acknowledge Acknowledge button text.
  * @param {string} dismiss Dismiss button text.
  */
-function setOverlayContent(title, description, acknowledge, dismiss = 'Dismiss'){
+function setOverlayContent(title, description, acknowledge, dismiss = 'Dismiss') {
     document.getElementById('overlayTitle').innerHTML = title
     document.getElementById('overlayDesc').innerHTML = description
     document.getElementById('overlayAcknowledge').innerHTML = acknowledge
@@ -140,11 +141,11 @@ function setOverlayContent(title, description, acknowledge, dismiss = 'Dismiss')
 /**
  * Set the onclick handler of the overlay acknowledge button.
  * If the handler is null, a default handler will be added.
- * 
- * @param {function} handler 
+ *
+ * @param {function} handler
  */
-function setOverlayHandler(handler){
-    if(handler == null){
+function setOverlayHandler(handler) {
+    if (handler == null) {
         document.getElementById('overlayAcknowledge').onclick = () => {
             toggleOverlay(false)
         }
@@ -156,11 +157,11 @@ function setOverlayHandler(handler){
 /**
  * Set the onclick handler of the overlay dismiss button.
  * If the handler is null, a default handler will be added.
- * 
- * @param {function} handler 
+ *
+ * @param {function} handler
  */
-function setDismissHandler(handler){
-    if(handler == null){
+function setDismissHandler(handler) {
+    if (handler == null) {
         document.getElementById('overlayDismiss').onclick = () => {
             toggleOverlay(false)
         }
@@ -173,8 +174,8 @@ function setDismissHandler(handler){
 
 document.getElementById('serverSelectConfirm').addEventListener('click', () => {
     const listings = document.getElementsByClassName('serverListing')
-    for(let i=0; i<listings.length; i++){
-        if(listings[i].hasAttribute('selected')){
+    for (let i = 0; i < listings.length; i++) {
+        if (listings[i].hasAttribute('selected')) {
             const serv = DistroManager.getDistribution().getServer(listings[i].getAttribute('servid'))
             updateSelectedServer(serv)
             refreshServerStatus(true)
@@ -183,7 +184,7 @@ document.getElementById('serverSelectConfirm').addEventListener('click', () => {
         }
     }
     // None are selected? Not possible right? Meh, handle it.
-    if(listings.length > 0){
+    if (listings.length > 0) {
         const serv = DistroManager.getDistribution().getServer(listings[i].getAttribute('servid'))
         updateSelectedServer(serv)
         toggleOverlay(false)
@@ -192,12 +193,12 @@ document.getElementById('serverSelectConfirm').addEventListener('click', () => {
 
 document.getElementById('accountSelectConfirm').addEventListener('click', () => {
     const listings = document.getElementsByClassName('accountListing')
-    for(let i=0; i<listings.length; i++){
-        if(listings[i].hasAttribute('selected')){
+    for (let i = 0; i < listings.length; i++) {
+        if (listings[i].hasAttribute('selected')) {
             const authAcc = ConfigManager.setSelectedAccount(listings[i].getAttribute('uuid'))
             ConfigManager.save()
             updateSelectedAccount(authAcc)
-            if(getCurrentView() === VIEWS.settings) {
+            if (getCurrentView() === VIEWS.settings) {
                 prepareSettings()
             }
             toggleOverlay(false)
@@ -206,11 +207,11 @@ document.getElementById('accountSelectConfirm').addEventListener('click', () => 
         }
     }
     // None are selected? Not possible right? Meh, handle it.
-    if(listings.length > 0){
+    if (listings.length > 0) {
         const authAcc = ConfigManager.setSelectedAccount(listings[0].getAttribute('uuid'))
         ConfigManager.save()
         updateSelectedAccount(authAcc)
-        if(getCurrentView() === VIEWS.settings) {
+        if (getCurrentView() === VIEWS.settings) {
             prepareSettings()
         }
         toggleOverlay(false)
@@ -229,16 +230,34 @@ document.getElementById('accountSelectCancel').addEventListener('click', () => {
     })
 })
 
-function setServerListingHandlers(){
+function setServerListingHandlers() {
     const listings = Array.from(document.getElementsByClassName('serverListing'))
     listings.map((val) => {
+        val.ondblclick = e => {
+            const listings = document.getElementsByClassName('serverListing')
+            for (let i = 0; i < listings.length; i++) {
+                if (listings[i].hasAttribute('selected')) {
+                    const serv = DistroManager.getDistribution().getServer(listings[i].getAttribute('servid'))
+                    updateSelectedServer(serv)
+                    refreshServerStatus(true)
+                    toggleOverlay(false)
+                    return
+                }
+            }
+            // None are selected? Not possible right? Meh, handle it.
+            if (listings.length > 0) {
+                const serv = DistroManager.getDistribution().getServer(listings[i].getAttribute('servid'))
+                updateSelectedServer(serv)
+                toggleOverlay(false)
+            }
+        }
         val.onclick = e => {
-            if(val.hasAttribute('selected')){
+            if (val.hasAttribute('selected')) {
                 return
             }
             const cListings = document.getElementsByClassName('serverListing')
-            for(let i=0; i<cListings.length; i++){
-                if(cListings[i].hasAttribute('selected')){
+            for (let i = 0; i < cListings.length; i++) {
+                if (cListings[i].hasAttribute('selected')) {
                     cListings[i].removeAttribute('selected')
                 }
             }
@@ -248,16 +267,16 @@ function setServerListingHandlers(){
     })
 }
 
-function setAccountListingHandlers(){
+function setAccountListingHandlers() {
     const listings = Array.from(document.getElementsByClassName('accountListing'))
     listings.map((val) => {
         val.onclick = e => {
-            if(val.hasAttribute('selected')){
+            if (val.hasAttribute('selected')) {
                 return
             }
             const cListings = document.getElementsByClassName('accountListing')
-            for(let i=0; i<cListings.length; i++){
-                if(cListings[i].hasAttribute('selected')){
+            for (let i = 0; i < cListings.length; i++) {
+                if (cListings[i].hasAttribute('selected')) {
                     cListings[i].removeAttribute('selected')
                 }
             }
@@ -267,12 +286,12 @@ function setAccountListingHandlers(){
     })
 }
 
-function populateServerListings(){
+function populateServerListings() {
     const distro = DistroManager.getDistribution()
     const giaSel = ConfigManager.getSelectedServer()
     const servers = distro.getServers()
     let htmlString = ''
-    for(const serv of servers){
+    for (const serv of servers) {
         htmlString += `<button class="serverListing" servid="${serv.getID()}" ${serv.getID() === giaSel ? 'selected' : ''}>
             <img class="serverListingImg" src="${serv.getIcon()}"/>
             <div class="serverListingDetails">
@@ -299,12 +318,12 @@ function populateServerListings(){
 
 }
 
-function populateAccountListings(){
+function populateAccountListings() {
     const accountsObj = ConfigManager.getAuthAccounts()
-    const accounts = Array.from(Object.keys(accountsObj), v=>accountsObj[v])
+    const accounts = Array.from(Object.keys(accountsObj), v => accountsObj[v])
     let htmlString = ''
-    for(let i=0; i<accounts.length; i++){
-        htmlString += `<button class="accountListing" uuid="${accounts[i].uuid}" ${i===0 ? 'selected' : ''}>
+    for (let i = 0; i < accounts.length; i++) {
+        htmlString += `<button class="accountListing" uuid="${accounts[i].uuid}" ${i === 0 ? 'selected' : ''}>
             <img src="https://mc-heads.net/head/${accounts[i].uuid}/40">
             <div class="accountListingName">${accounts[i].displayName}</div>
         </button>`
@@ -313,12 +332,12 @@ function populateAccountListings(){
 
 }
 
-function prepareServerSelectionList(){
+function prepareServerSelectionList() {
     populateServerListings()
     setServerListingHandlers()
 }
 
-function prepareAccountSelectionList(){
+function prepareAccountSelectionList() {
     populateAccountListings()
     setAccountListingHandlers()
 }

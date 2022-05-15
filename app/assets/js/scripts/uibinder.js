@@ -3,12 +3,12 @@
  * Loaded after core UI functions are initialized in uicore.js.
  */
 // Requirements
-const path          = require('path')
+const path = require('path')
 
-const AuthManager   = require('./assets/js/authmanager')
+const AuthManager = require('./assets/js/authmanager')
 const ConfigManager = require('./assets/js/configmanager')
 const DistroManager = require('./assets/js/distromanager')
-const Lang          = require('./assets/js/langloader')
+const Lang = require('./assets/js/langloader')
 
 let rscShouldLoad = false
 let fatalStartupError = false
@@ -28,8 +28,8 @@ let currentView
 
 /**
  * Switch launcher views.
- * 
- * @param {string} current The ID of the current view container. 
+ *
+ * @param {string} current The ID of the current view container.
  * @param {*} next The ID of the next view container.
  * @param {*} currentFadeTime Optional. The fade out time for the current view.
  * @param {*} nextFadeTime Optional. The fade in time for the next view.
@@ -38,7 +38,9 @@ let currentView
  * @param {*} onNextFade Optional. Callback function to execute when the next view
  * fades in.
  */
-function switchView(current, next, currentFadeTime = 500, nextFadeTime = 500, onCurrentFade = () => {}, onNextFade = () => {}){
+function switchView(current, next, currentFadeTime = 500, nextFadeTime = 500, onCurrentFade = () => {
+}, onNextFade = () => {
+}) {
     currentView = next
     $(`${current}`).fadeOut(currentFadeTime, () => {
         onCurrentFade()
@@ -50,16 +52,16 @@ function switchView(current, next, currentFadeTime = 500, nextFadeTime = 500, on
 
 /**
  * Get the currently shown view container.
- * 
+ *
  * @returns {string} The currently shown view container.
  */
-function getCurrentView(){
+function getCurrentView() {
     return currentView
 }
 
-function showMainUI(data){
+function showMainUI(data) {
 
-    if(!isDev){
+    if (!isDev) {
         loggerAutoUpdater.log('Initializing..')
         ipcRenderer.send('autoUpdateAction', 'initAutoUpdater', ConfigManager.getAllowPrerelease())
     }
@@ -69,22 +71,22 @@ function showMainUI(data){
     refreshServerStatus()
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
-        document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`
+        document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.png')`
         $('#main').show()
 
         const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
 
         // If this is enabled in a development environment we'll get ratelimited.
         // The relaunch frequency is usually far too high.
-        if(!isDev && isLoggedIn){
+        if (!isDev && isLoggedIn) {
             validateSelectedAccount()
         }
 
-        if(ConfigManager.isFirstLaunch()){
+        if (ConfigManager.isFirstLaunch()) {
             currentView = VIEWS.welcome
             $(VIEWS.welcome).fadeIn(1000)
         } else {
-            if(isLoggedIn){
+            if (isLoggedIn) {
                 currentView = VIEWS.landing
                 $(VIEWS.landing).fadeIn(1000)
             } else {
@@ -101,7 +103,7 @@ function showMainUI(data){
                 $('#loadSpinnerImage').removeClass('rotating')
             })
         }, 250)
-        
+
     }, 750)
     // Disable tabbing to the news container.
     initNews().then(() => {
@@ -109,7 +111,7 @@ function showMainUI(data){
     })
 }
 
-function showFatalStartupError(){
+function showFatalStartupError() {
     setTimeout(() => {
         $('#loadingContainer').fadeOut(250, () => {
             document.getElementById('overlayContainer').style.background = 'none'
@@ -129,10 +131,10 @@ function showFatalStartupError(){
 
 /**
  * Common functions to perform after refreshing the distro index.
- * 
+ *
  * @param {Object} data The distro index object.
  */
-function onDistroRefresh(data){
+function onDistroRefresh(data) {
     updateSelectedServer(data.getServer(ConfigManager.getSelectedServer()))
     refreshServerStatus()
     initNews()
@@ -141,41 +143,41 @@ function onDistroRefresh(data){
 
 /**
  * Sync the mod configurations with the distro index.
- * 
+ *
  * @param {Object} data The distro index object.
  */
-function syncModConfigurations(data){
+function syncModConfigurations(data) {
 
     const syncedCfgs = []
 
-    for(let serv of data.getServers()){
+    for (let serv of data.getServers()) {
 
         const id = serv.getID()
         const mdls = serv.getModules()
         const cfg = ConfigManager.getModConfiguration(id)
 
-        if(cfg != null){
+        if (cfg != null) {
 
             const modsOld = cfg.mods
             const mods = {}
 
-            for(let mdl of mdls){
+            for (let mdl of mdls) {
                 const type = mdl.getType()
 
-                if(type === DistroManager.Types.ForgeMod || type === DistroManager.Types.LiteMod || type === DistroManager.Types.LiteLoader){
-                    if(!mdl.getRequired().isRequired()){
+                if (type === DistroManager.Types.ForgeMod || type === DistroManager.Types.LiteMod || type === DistroManager.Types.LiteLoader) {
+                    if (!mdl.getRequired().isRequired()) {
                         const mdlID = mdl.getVersionlessID()
-                        if(modsOld[mdlID] == null){
+                        if (modsOld[mdlID] == null) {
                             mods[mdlID] = scanOptionalSubModules(mdl.getSubModules(), mdl)
                         } else {
                             mods[mdlID] = mergeModConfiguration(modsOld[mdlID], scanOptionalSubModules(mdl.getSubModules(), mdl), false)
                         }
                     } else {
-                        if(mdl.hasSubModules()){
+                        if (mdl.hasSubModules()) {
                             const mdlID = mdl.getVersionlessID()
                             const v = scanOptionalSubModules(mdl.getSubModules(), mdl)
-                            if(typeof v === 'object'){
-                                if(modsOld[mdlID] == null){
+                            if (typeof v === 'object') {
+                                if (modsOld[mdlID] == null) {
                                     mods[mdlID] = v
                                 } else {
                                     mods[mdlID] = mergeModConfiguration(modsOld[mdlID], v, true)
@@ -195,15 +197,15 @@ function syncModConfigurations(data){
 
             const mods = {}
 
-            for(let mdl of mdls){
+            for (let mdl of mdls) {
                 const type = mdl.getType()
-                if(type === DistroManager.Types.ForgeMod || type === DistroManager.Types.LiteMod || type === DistroManager.Types.LiteLoader){
-                    if(!mdl.getRequired().isRequired()){
+                if (type === DistroManager.Types.ForgeMod || type === DistroManager.Types.LiteMod || type === DistroManager.Types.LiteLoader) {
+                    if (!mdl.getRequired().isRequired()) {
                         mods[mdl.getVersionlessID()] = scanOptionalSubModules(mdl.getSubModules(), mdl)
                     } else {
-                        if(mdl.hasSubModules()){
+                        if (mdl.hasSubModules()) {
                             const v = scanOptionalSubModules(mdl.getSubModules(), mdl)
-                            if(typeof v === 'object'){
+                            if (typeof v === 'object') {
                                 mods[mdl.getVersionlessID()] = v
                             }
                         }
@@ -227,24 +229,24 @@ function syncModConfigurations(data){
  * Recursively scan for optional sub modules. If none are found,
  * this function returns a boolean. If optional sub modules do exist,
  * a recursive configuration object is returned.
- * 
+ *
  * @returns {boolean | Object} The resolved mod configuration.
  */
-function scanOptionalSubModules(mdls, origin){
-    if(mdls != null){
+function scanOptionalSubModules(mdls, origin) {
+    if (mdls != null) {
         const mods = {}
 
-        for(let mdl of mdls){
+        for (let mdl of mdls) {
             const type = mdl.getType()
             // Optional types.
-            if(type === DistroManager.Types.ForgeMod || type === DistroManager.Types.LiteMod || type === DistroManager.Types.LiteLoader){
+            if (type === DistroManager.Types.ForgeMod || type === DistroManager.Types.LiteMod || type === DistroManager.Types.LiteLoader) {
                 // It is optional.
-                if(!mdl.getRequired().isRequired()){
+                if (!mdl.getRequired().isRequired()) {
                     mods[mdl.getVersionlessID()] = scanOptionalSubModules(mdl.getSubModules(), mdl)
                 } else {
-                    if(mdl.hasSubModules()){
+                    if (mdl.hasSubModules()) {
                         const v = scanOptionalSubModules(mdl.getSubModules(), mdl)
-                        if(typeof v === 'object'){
+                        if (typeof v === 'object') {
                             mods[mdl.getVersionlessID()] = v
                         }
                     }
@@ -252,11 +254,11 @@ function scanOptionalSubModules(mdls, origin){
             }
         }
 
-        if(Object.keys(mods).length > 0){
+        if (Object.keys(mods).length > 0) {
             const ret = {
                 mods
             }
-            if(!origin.getRequired().isRequired()){
+            if (!origin.getRequired().isRequired()) {
                 ret.value = origin.getRequired().isDefault()
             }
             return ret
@@ -267,34 +269,34 @@ function scanOptionalSubModules(mdls, origin){
 
 /**
  * Recursively merge an old configuration into a new configuration.
- * 
+ *
  * @param {boolean | Object} o The old configuration value.
  * @param {boolean | Object} n The new configuration value.
  * @param {boolean} nReq If the new value is a required mod.
- * 
+ *
  * @returns {boolean | Object} The merged configuration.
  */
-function mergeModConfiguration(o, n, nReq = false){
-    if(typeof o === 'boolean'){
-        if(typeof n === 'boolean') return o
-        else if(typeof n === 'object'){
-            if(!nReq){
+function mergeModConfiguration(o, n, nReq = false) {
+    if (typeof o === 'boolean') {
+        if (typeof n === 'boolean') return o
+        else if (typeof n === 'object') {
+            if (!nReq) {
                 n.value = o
             }
             return n
         }
-    } else if(typeof o === 'object'){
-        if(typeof n === 'boolean') return typeof o.value !== 'undefined' ? o.value : true
-        else if(typeof n === 'object'){
-            if(!nReq){
+    } else if (typeof o === 'object') {
+        if (typeof n === 'boolean') return typeof o.value !== 'undefined' ? o.value : true
+        else if (typeof n === 'object') {
+            if (!nReq) {
                 n.value = typeof o.value !== 'undefined' ? o.value : true
             }
 
             const newMods = Object.keys(n.mods)
-            for(let i=0; i<newMods.length; i++){
+            for (let i = 0; i < newMods.length; i++) {
 
                 const mod = newMods[i]
-                if(o.mods[mod] != null){
+                if (o.mods[mod] != null) {
                     n.mods[mod] = mergeModConfiguration(o.mods[mod], n.mods[mod])
                 }
             }
@@ -307,8 +309,8 @@ function mergeModConfiguration(o, n, nReq = false){
     return n
 }
 
-function refreshDistributionIndex(remote, onSuccess, onError){
-    if(remote){
+function refreshDistributionIndex(remote, onSuccess, onError) {
+    if (remote) {
         DistroManager.pullRemote()
             .then(onSuccess)
             .catch(onError)
@@ -319,11 +321,11 @@ function refreshDistributionIndex(remote, onSuccess, onError){
     }
 }
 
-async function validateSelectedAccount(){
+async function validateSelectedAccount() {
     const selectedAcc = ConfigManager.getSelectedAccount()
-    if(selectedAcc != null){
+    if (selectedAcc != null) {
         const val = await AuthManager.validateSelected()
-        if(!val){
+        if (!val) {
             ConfigManager.removeAuthAccount(selectedAcc.uuid)
             ConfigManager.save()
             const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
@@ -337,7 +339,7 @@ async function validateSelectedAccount(){
 
                 const isMicrosoft = selectedAcc.type === 'microsoft'
 
-                if(isMicrosoft) {
+                if (isMicrosoft) {
                     // Empty for now
                 } else {
                     // Mojang
@@ -345,14 +347,14 @@ async function validateSelectedAccount(){
                     document.getElementById('loginUsername').value = selectedAcc.username
                     validateEmail(selectedAcc.username)
                 }
-                
+
                 loginOptionsViewOnLoginSuccess = getCurrentView()
                 loginOptionsViewOnLoginCancel = VIEWS.loginOptions
 
-                if(accLen > 0) {
+                if (accLen > 0) {
                     loginOptionsViewOnCancel = getCurrentView()
                     loginOptionsViewCancelHandler = () => {
-                        if(isMicrosoft) {
+                        if (isMicrosoft) {
                             ConfigManager.addMicrosoftAuthAccount(
                                 selectedAcc.uuid,
                                 selectedAcc.accessToken,
@@ -376,7 +378,7 @@ async function validateSelectedAccount(){
                 switchView(getCurrentView(), VIEWS.loginOptions)
             })
             setDismissHandler(() => {
-                if(accLen > 1){
+                if (accLen > 1) {
                     prepareAccountSelectionList()
                     $('#overlayContent').fadeOut(250, () => {
                         bindOverlayKeys(true, 'accountSelectContent', true)
@@ -402,10 +404,10 @@ async function validateSelectedAccount(){
 /**
  * Temporary function to update the selected account along
  * with the relevent UI elements.
- * 
+ *
  * @param {string} uuid The UUID of the account.
  */
-function setSelectedAccount(uuid){
+function setSelectedAccount(uuid) {
     const authAcc = ConfigManager.setSelectedAccount(uuid)
     ConfigManager.save()
     updateSelectedAccount(authAcc)
@@ -413,35 +415,35 @@ function setSelectedAccount(uuid){
 }
 
 // Synchronous Listener
-document.addEventListener('readystatechange', function(){
+document.addEventListener('readystatechange', function () {
 
-    if (document.readyState === 'interactive' || document.readyState === 'complete'){
-        if(rscShouldLoad){
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        if (rscShouldLoad) {
             rscShouldLoad = false
-            if(!fatalStartupError){
+            if (!fatalStartupError) {
                 const data = DistroManager.getDistribution()
                 showMainUI(data)
             } else {
                 showFatalStartupError()
             }
-        } 
+        }
     }
 
 }, false)
 
 // Actions that must be performed after the distribution index is downloaded.
 ipcRenderer.on('distributionIndexDone', (event, res) => {
-    if(res) {
+    if (res) {
         const data = DistroManager.getDistribution()
         syncModConfigurations(data)
-        if(document.readyState === 'interactive' || document.readyState === 'complete'){
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
             showMainUI(data)
         } else {
             rscShouldLoad = true
         }
     } else {
         fatalStartupError = true
-        if(document.readyState === 'interactive' || document.readyState === 'complete'){
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
             showFatalStartupError()
         } else {
             rscShouldLoad = true

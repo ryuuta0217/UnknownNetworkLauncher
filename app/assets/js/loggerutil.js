@@ -1,32 +1,32 @@
 class LoggerUtil {
 
-    constructor(prefix, style){
+    constructor(prefix, style) {
         this.prefix = prefix
         this.style = style
     }
 
-    log(){
+    log() {
         console.log.apply(null, [this.prefix, this.style, ...arguments])
     }
 
-    info(){
+    info() {
         console.info.apply(null, [this.prefix, this.style, ...arguments])
     }
 
-    warn(){
+    warn() {
         console.warn.apply(null, [this.prefix, this.style, ...arguments])
     }
 
-    debug(){
+    debug() {
         console.debug.apply(null, [this.prefix, this.style, ...arguments])
     }
 
-    error(){
+    error() {
         console.error.apply(null, [this.prefix, this.style, ...arguments])
     }
 
 }
 
-module.exports = function (prefix, style){
+module.exports = function (prefix, style) {
     return new LoggerUtil(prefix, style)
 }
